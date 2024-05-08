@@ -20,7 +20,19 @@
 		"ghcr.io/jlaundry/devcontainer-features/azure-functions-core-tools:1": {
 			"version": "latest"
 		}
-	}
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"typespec.typespec-vscode",
+				"ms-dotnettools.csharp",
+				"ms-dotnettools.csdevkit",
+				"ms-dotnettools.vscode-dotnet-runtime",
+				"ms-azuretools.vscode-azurefunctions",
+				"hediet.vscode-drawio"
+			]
+		}
+	},
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
@@ -34,7 +46,7 @@
 	// }
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	// "postCreateCommand": "dotnet restore",
+	"postCreateCommand": "sh .devcontainer/postCreate.sh",
 
 	// Configure tool-specific properties.
 	// "customizations": {},

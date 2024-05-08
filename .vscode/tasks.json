@@ -76,6 +76,24 @@
       "command": "host start",
       "isBackground": true,
       "problemMatcher": "$func-dotnet-watch"
+    },
+    {
+      "label": "build (typespec)",
+      "command": "npx",
+      "type":"process",
+      "group": {
+        "isDefault": false,
+        "kind": "build"
+      },
+      "args": [
+        "tsp",
+        "compile",
+        "."
+      ],
+      "problemMatcher": "$tsc",
+      "options": {
+        "cwd": "${workspaceFolder}/docs/typespec"
+      }
     }
   ]
 }
