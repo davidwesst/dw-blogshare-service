@@ -29,7 +29,8 @@
 				"ms-dotnettools.csdevkit",
 				"ms-dotnettools.vscode-dotnet-runtime",
 				"ms-azuretools.vscode-azurefunctions",
-				"hediet.vscode-drawio"
+				"hediet.vscode-drawio",
+				"rangav.vscode-thunder-client"
 			]
 		}
 	},
