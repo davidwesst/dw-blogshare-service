@@ -7,58 +7,94 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using ReverseMarkdown;
+using HtmlAgilityPack;
 
-namespace DW.Website
+namespace DW.Website;
+
+public class NormalizeBlogPost
 {
-    public class NormalizeBlogPost
+    private readonly ILogger<BlogShare> _logger;
+
+    public NormalizeBlogPost(ILogger<BlogShare> logger)
     {
-        private readonly ILogger<BlogShare> _logger;
+        _logger = logger;
+    }
 
-        public NormalizeBlogPost(ILogger<BlogShare> logger)
+    [Function("normalize")]
+    public async Task<IActionResult> Run(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "normalize")]
+        HttpRequest req, 
+        string destination
+        )
+    {
+        try
         {
-            _logger = logger;
+            var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+            BlogPost? blogPost = JsonSerializer.Deserialize<BlogPost>(requestBody);
+
+            if(blogPost != null && string.IsNullOrEmpty(blogPost.MDContent))
+            {
+                _logger.LogInformation("Converting HTML to fill in MDContent property");
+                blogPost.MDContent = ConvertHTMLtoMD(blogPost.HTMLContent);
+            }
+
+            if(blogPost != null && blogPost.MediaURLs.Length == 0)
+            {
+                _logger.LogInformation("Extracting media URLs from HTML");
+                blogPost.MediaURLs = ExtractMediaUrls(blogPost.HTMLContent);
+            }
+
+            _logger.LogInformation("Processed Normalize Request.");
+
+            return new OkObjectResult(blogPost);
+        }
+        catch (JsonException ex)
+        {
+            _logger.LogError("A JsonException was thrown. This is likely due to invalid data in the request body, such as null values.");
+            _logger.LogError(ex.Message);
+
+            return new BadRequestObjectResult("JSON Error!");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.ToString());
+            return new BadRequestObjectResult("Error!");
+        }
+    }
+
+    private string ConvertHTMLtoMD(string htmlContent)
+    {
+        var converter = new ReverseMarkdown.Converter();
+        return converter.Convert(htmlContent);
+    }
+
+    public static string[] ExtractMediaUrls(string htmlContent)
+    {
+        var mediaUrls = new List<string>();
+        var htmlDoc = new HtmlDocument();
+        htmlDoc.LoadHtml(htmlContent);
+
+        // Extract images
+        var imageNodes = htmlDoc.DocumentNode.SelectNodes("//img[@src]");
+        if (imageNodes != null)
+        {
+            mediaUrls.AddRange(imageNodes.Select(node => node.GetAttributeValue("src", string.Empty)));
         }
 
-        [Function("normalize")]
-        public async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "normalize")]
-            HttpRequest req, 
-            string destination
-            )
+        // Extract videos
+        var videoNodes = htmlDoc.DocumentNode.SelectNodes("//video/source[@src]");
+        if (videoNodes != null)
         {
-            try
-            {
-                var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-                BlogPost? blogPost = JsonSerializer.Deserialize<BlogPost>(requestBody);
-
-                if(blogPost != null && string.IsNullOrEmpty(blogPost.MDContent))
-                {
-                    _logger.LogInformation("Converting HTML to fill in MDContent property");
-                    blogPost.MDContent = ConvertHTMLtoMD(blogPost.HTMLContent);
-                }
-
-                _logger.LogInformation("Processed Normalize Request.");
-
-                return new OkObjectResult(blogPost);
-            }
-            catch (JsonException ex)
-            {
-                _logger.LogError("A JsonException was thrown. This is likely due to invalid data in the request body, such as null values.");
-                _logger.LogError(ex.Message);
-
-                return new BadRequestObjectResult("JSON Error!");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex.ToString());
-                return new BadRequestObjectResult("Error!");
-            }
+            mediaUrls.AddRange(videoNodes.Select(node => node.GetAttributeValue("src", string.Empty)));
         }
 
-        private string ConvertHTMLtoMD(string html)
+        // Extract audio
+        var audioNodes = htmlDoc.DocumentNode.SelectNodes("//audio/source[@src]");
+        if (audioNodes != null)
         {
-            var converter = new ReverseMarkdown.Converter();
-            return converter.Convert(html);
+            mediaUrls.AddRange(audioNodes.Select(node => node.GetAttributeValue("src", string.Empty)));
         }
+
+        return mediaUrls.ToArray();
     }
 }
