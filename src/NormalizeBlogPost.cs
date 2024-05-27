@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
+using ReverseMarkdown;
 
 namespace DW.Website
 {
@@ -28,11 +29,17 @@ namespace DW.Website
             try
             {
                 var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-                var blogPostBody = JsonSerializer.Deserialize<BlogPost>(requestBody);
+                BlogPost? blogPost = JsonSerializer.Deserialize<BlogPost>(requestBody);
+
+                if(blogPost != null && string.IsNullOrEmpty(blogPost.MDContent))
+                {
+                    _logger.LogInformation("Converting HTML to fill in MDContent property");
+                    blogPost.MDContent = ConvertHTMLtoMD(blogPost.HTMLContent);
+                }
 
                 _logger.LogInformation("Processed Normalize Request.");
 
-                return new OkObjectResult(blogPostBody);
+                return new OkObjectResult(blogPost);
             }
             catch (JsonException ex)
             {
@@ -46,6 +53,12 @@ namespace DW.Website
                 _logger.LogError(ex.ToString());
                 return new BadRequestObjectResult("Error!");
             }
+        }
+
+        private string ConvertHTMLtoMD(string html)
+        {
+            var converter = new ReverseMarkdown.Converter();
+            return converter.Convert(html);
         }
     }
 }
