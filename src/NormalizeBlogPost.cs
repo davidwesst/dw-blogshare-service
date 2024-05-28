@@ -44,6 +44,11 @@ public class NormalizeBlogPost
                 blogPost.MediaURLs = ExtractMediaUrls(blogPost.HTMLContent);
             }
 
+            if(blogPost != null && blogPost.LastUpdatedDate == DateTime.MinValue)
+            {
+                blogPost.LastUpdatedDate = blogPost.PublishDate;
+            }
+
             _logger.LogInformation("Processed Normalize Request.");
 
             return new OkObjectResult(blogPost);
