@@ -7,6 +7,9 @@ var host = new HostBuilder()
     .ConfigureServices(services => {
         services.AddApplicationInsightsTelemetryWorkerService();
         services.ConfigureFunctionsApplicationInsights();
+        services.ConfigureHttpJsonOptions(options => {
+            options.SerializerOptions.PropertyNameCaseInsensitive = true;
+        });
     })
     .Build();
 
