@@ -7,7 +7,7 @@ on:
       - ft/normalize-post
 
 env:
-  AZURE_FUNCTIONAPP_NAME: 'func-dwwebsite-prod-eastus-001'
+  AZURE_FUNCTIONAPP_NAME: 'func-blogshare-prod-001'
   AZURE_FUNCTIONAPP_PACKAGE_PATH: './src'
   DOTNET_VERSION: '8.0.x'
 
@@ -32,7 +32,7 @@ jobs:
         popd
 
     - name: 'Run Azure Functions Action'
-      uses: Azure/functions-action@v1.5.2
+      uses: Azure/functions-action@v1
       id: fa
       with:
         app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
