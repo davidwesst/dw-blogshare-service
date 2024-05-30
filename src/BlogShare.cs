@@ -17,7 +17,7 @@ namespace DW.Website
             _logger = logger;
         }
 
-        [Function("blogshare")]
+        //[Function("blogshare")]
         public IActionResult Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "blogshare/{destination?}")]
             HttpRequest req, 
