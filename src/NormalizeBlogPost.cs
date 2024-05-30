@@ -55,15 +55,19 @@ public class NormalizeBlogPost
         }
         catch (JsonException ex)
         {
-            _logger.LogError("A JsonException was thrown. This is likely due to invalid data in the request body, such as null values.");
+            var errorMsg = "A JsonException was thrown. This is likely due to invalid data in the request body, such as null values.";
+
+            _logger.LogError(errorMsg);
             _logger.LogError(ex.Message);
 
-            return new BadRequestObjectResult("JSON Error!");
+            return new BadRequestObjectResult(errorMsg);
         }
         catch (Exception ex)
         {
+            var errorMsg = "An unknown error was thrown when processing. Check logs for details.";
+
             _logger.LogError(ex.ToString());
-            return new BadRequestObjectResult("Error!");
+            return new BadRequestObjectResult(errorMsg);
         }
     }
 
