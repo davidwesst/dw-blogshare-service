@@ -25,7 +25,6 @@ public class NormalizeBlogPost
     }
 
     [OpenApiOperation(operationId: "normalize", tags: new[] { "normalize" }, Summary = "Normalize", Description = "Normalizes a blog post JSON object and fills in missing data as necessary.", Visibility = OpenApiVisibilityType.Important)]
-    [OpenApiSecurity("function_key", SecuritySchemeType.ApiKey, Name = "code", In = OpenApiSecurityLocationType.None)]
     [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(BlogPost))]
     [Function("normalize")]
     public async Task<IActionResult> Run(
