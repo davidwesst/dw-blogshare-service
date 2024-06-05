@@ -25,8 +25,8 @@ public class NormalizeBlogPost
     }
 
     [OpenApiOperation(operationId: "normalize", tags: new[] { "normalize" }, Summary = "Normalize", Description = "Normalizes a blog post JSON object and fills in missing data as necessary.", Visibility = OpenApiVisibilityType.Important)]
-    [OpenApiSecurity("function_key", SecuritySchemeType.ApiKey, Name = "code", In = OpenApiSecurityLocationType.Header)]
-    [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "text/json", bodyType: typeof(string), Summary = "Normalized Blog Post", Description = "This returns a normalized version of the received blog post object.")]
+    [OpenApiSecurity("function_key", SecuritySchemeType.ApiKey, Name = "code", In = OpenApiSecurityLocationType.None)]
+    [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(BlogPost))]
     [Function("normalize")]
     public async Task<IActionResult> Run(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "normalize")]
