@@ -15,11 +15,11 @@ using System.Net;
 
 namespace DW.Website;
 
-public class NormalizeBlogPost
+public class Normalize
 {
-    private readonly ILogger<BlogShare> _logger;
+    private readonly ILogger<Normalize> _logger;
 
-    public NormalizeBlogPost(ILogger<BlogShare> logger)
+    public Normalize(ILogger<Normalize> logger)
     {
         _logger = logger;
     }

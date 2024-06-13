@@ -4,6 +4,7 @@
 	"name": "C# (.NET)",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
 	"image": "mcr.microsoft.com/devcontainers/dotnet:1-8.0-bookworm",
+	"runArgs": ["--env-file", ".devcontainer/devcontainer.env"],
 	"features": {
 		"ghcr.io/devcontainers/features/azure-cli:1": {
 			"installBicep": true,
@@ -30,7 +31,8 @@
 				"ms-dotnettools.vscode-dotnet-runtime",
 				"ms-azuretools.vscode-azurefunctions",
 				"hediet.vscode-drawio",
-				"rangav.vscode-thunder-client"
+				"rangav.vscode-thunder-client",
+				"k--kato.docomment"
 			]
 		}
 	},
@@ -47,7 +49,7 @@
 	// }
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "sh .devcontainer/postCreate.sh",
+	//"postCreateCommand": "sh .devcontainer/postCreate.sh",
 
 	// Configure tool-specific properties.
 	// "customizations": {},
