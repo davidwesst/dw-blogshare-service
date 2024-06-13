@@ -8,6 +8,10 @@ using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using ReverseMarkdown;
 using HtmlAgilityPack;
+using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
+using Microsoft.OpenApi.Models;
+using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Enums;
+using System.Net;
 
 namespace DW.Website;
 
@@ -20,6 +24,8 @@ public class NormalizeBlogPost
         _logger = logger;
     }
 
+    [OpenApiOperation(operationId: "normalize", tags: new[] { "normalize" }, Summary = "Normalize", Description = "Normalizes a blog post JSON object and fills in missing data as necessary.", Visibility = OpenApiVisibilityType.Important)]
+    [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(BlogPost))]
     [Function("normalize")]
     public async Task<IActionResult> Run(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "normalize")]
