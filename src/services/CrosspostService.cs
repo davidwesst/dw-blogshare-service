@@ -4,20 +4,24 @@ using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
 using ReverseMarkdown;
 using System.IO;
+using System.IO.Abstractions;
 
 namespace DW.Website.Services;
 
 public class CrosspostService
 {
     private readonly ILogger _logger;
+    private readonly IFileSystem _fs;
 
-    public CrosspostService(ILogger logger)
+    public CrosspostService(IFileSystem fs, ILogger logger)
     {
+        _fs = fs;
         _logger = logger;
     }
 
     public CrosspostService()
     {
+        _fs = new FileSystem(); 
         _logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger(typeof(CrosspostService));
     }
     
@@ -29,7 +33,5 @@ public class CrosspostService
 
         // clone repository
         var wdRepository = Repository.Clone("https://github.com/westerndevs/western-devs-website", repoDirectory);
-
-        // 
     }
 }

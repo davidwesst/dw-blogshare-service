@@ -1,8 +1,10 @@
 
+using System.IO.Abstractions;
 using DW.Website.Models;
 using Kekiri.Xunit;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Xunit;
 
 namespace DW.Website.Services.Tests;
 
@@ -26,6 +28,29 @@ public class CrosspostServiceScenarios : Scenarios, IDisposable
     }
 
     [Scenario]
+    public void This_should_pass()
+    {
+        Given(something);
+        When(it_happens);
+        Then(you_will_know);
+    }
+
+    void something()
+    {
+        var something = true;
+    }
+
+    void it_happens()
+    {
+        var another_something = true;
+    }
+
+    void you_will_know()
+    {
+        Assert.True(true);
+    }
+
+    [Scenario(Skip = "Not a unit test")]
     public void Cloning_a_repository()
     {
         Given(a_crosspostservice)
@@ -37,7 +62,9 @@ public class CrosspostServiceScenarios : Scenarios, IDisposable
     void a_crosspostservice()
     {
         var mockLogger = new Mock<ILogger>();
-        _service = new CrosspostService(mockLogger.Object);
+        var mockFileSystem = new Mock<IFileSystem>();
+        
+        _service = new CrosspostService(mockFileSystem.Object, mockLogger.Object);
     }
 
     void a_valid_blog_post()
