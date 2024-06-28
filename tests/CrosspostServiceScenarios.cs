@@ -6,7 +6,6 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 using LibGit2Sharp;
-using DW.Website.Wrappers;
 using DW.Website.Factories;
 
 namespace DW.Website.Services.Tests;
@@ -18,10 +17,9 @@ public class CrosspostServiceScenarios : Scenarios, IDisposable
     string repositoryDirectory = Path.Join(Path.GetTempPath(), "testrepo");
 
     Mock<ILogger> _mockLogger;
-    Mock<IRepositoryCloneWrapper> _mockCloner;
     Mock<IFileSystem> _mockFileSystem;
     Mock<IFile> _mockFile;
-    Mock<IRepositoryFactory> _mockRepositoryFactory;
+    Mock<IGitRepositoryFactory> _mockRepositoryFactory;
     Mock<IRepository> _mockRepository;
     Mock<LibGit2Sharp.Index> _mockIndex;
     Mock<Network> _mockNetwork;
@@ -33,14 +31,13 @@ public class CrosspostServiceScenarios : Scenarios, IDisposable
         _service = new CrosspostService();
         _blogPost = new BlogPost();
         
-        _mockCloner = new Mock<IRepositoryCloneWrapper>();
         _mockLogger = new Mock<ILogger>();
 
         _mockFileSystem = new Mock<IFileSystem>();
         _mockFile = new Mock<IFile>();
         _mockFileSystem.Setup(m => m.File).Returns(_mockFile.Object);
 
-        _mockRepositoryFactory = new Mock<IRepositoryFactory>();
+        _mockRepositoryFactory = new Mock<IGitRepositoryFactory>();
         _mockRepository = new Mock<IRepository>();
         _mockIndex = new Mock<LibGit2Sharp.Index>();
         _mockNetwork = new Mock<Network>();
@@ -83,7 +80,7 @@ public class CrosspostServiceScenarios : Scenarios, IDisposable
 
     void a_crosspostservice()
     {
-        _service = new CrosspostService(_mockFileSystem.Object, _mockLogger.Object, _mockCloner.Object, _mockRepositoryFactory.Object);
+        _service = new CrosspostService(_mockFileSystem.Object, _mockLogger.Object, _mockRepositoryFactory.Object);
     }
 
     void a_valid_blog_post()
@@ -106,7 +103,7 @@ public class CrosspostServiceScenarios : Scenarios, IDisposable
 
     void the_repsitory_is_cloned()
     {
-        _mockCloner.Verify(service => service.Clone(It.IsAny<string>(), It.IsAny<string>()), Times.Once());
+        _mockRepositoryFactory.Verify(service => service.Clone(It.IsAny<string>(), It.IsAny<string>()), Times.Once());
         //Assert.True(Directory.Exists(repositoryDirectory));
         //Assert.True(Directory.GetFiles(repositoryDirectory).Length != 0);
     }

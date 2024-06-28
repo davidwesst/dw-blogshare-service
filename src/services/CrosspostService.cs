@@ -1,5 +1,4 @@
 using DW.Website.Models;
-using DW.Website.Wrappers;
 using LibGit2Sharp;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
@@ -14,16 +13,14 @@ public class CrosspostService
 {
     private readonly ILogger _logger;
     private readonly IFileSystem _fs;
-    private readonly IRepositoryCloneWrapper _cloner;
-    private readonly IRepositoryFactory _repoFactory;
+    private readonly IGitRepositoryFactory _repoFactory;
 
     public static readonly string WD_POST_DIRECTORY = @"./source/_posts/";
     public static readonly string WD_REPO_URL = @"https://github.com/westerndevs/western-devs-website";
     private readonly string WD_AUTHOR = "david_wesst";
 
-    public CrosspostService(IFileSystem fs, ILogger logger, IRepositoryCloneWrapper cloner, IRepositoryFactory repoFactory)
+    public CrosspostService(IFileSystem fs, ILogger logger, IGitRepositoryFactory repoFactory)
     {
-        _cloner = cloner;
         _fs = fs;
         _logger = logger;
         _repoFactory = repoFactory;
@@ -31,7 +28,6 @@ public class CrosspostService
 
     public CrosspostService()
     {
-        _cloner = new RepositoryCloneWrapper();
         _fs = new FileSystem(); 
         _logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger(typeof(CrosspostService));
         _repoFactory = new GitRepositoryFactory();
@@ -45,7 +41,7 @@ public class CrosspostService
 
         // clone repository
         //var wdRepository = Repository.Clone("https://github.com/westerndevs/western-devs-website", repoDirectory);
-        var wdRepositoryPath = _cloner.Clone(WD_REPO_URL, repoDirectory);
+        var wdRepositoryPath = _repoFactory.Clone(WD_REPO_URL, repoDirectory);
 
         // add markdown post to directory
         var postFileName = "test-post.md";
