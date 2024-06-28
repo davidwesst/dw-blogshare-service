@@ -7,24 +7,20 @@ namespace DW.Website.Services;
 
 public class GitHelperService(IFileSystem fs, ILogger logger, IGitRepositoryFactory repoFactory)
 {
-    private readonly ILogger _logger = logger;
-    private readonly IFileSystem _fs = fs;
-    private readonly IGitRepositoryFactory _repoFactory = repoFactory;
-
     public void AddFileToRepo(string repoUrl, string relativeFilePath, string fileContents, string commitMessage, string branchName)
     {
         // prep temp directory
         var repoDirectory = Path.Join(Path.GetTempPath(), "testrepo");
-        _logger.LogInformation(repoDirectory);
+        logger.LogInformation(repoDirectory);
 
         // clone repository
-        var clonePath = _repoFactory.Clone(repoUrl, repoDirectory);
+        var clonePath = repoFactory.Clone(repoUrl, repoDirectory);
         var newFilePath = Path.Join(clonePath, relativeFilePath);
 
-        _fs.File.WriteAllText(newFilePath, fileContents);
+        fs.File.WriteAllText(newFilePath, fileContents);
 
         // stage the post file
-        var repo = _repoFactory.Create(clonePath);
+        var repo = repoFactory.Create(clonePath);
         repo.Index.Add(newFilePath);
 
         // commit file to repo
