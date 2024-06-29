@@ -4,7 +4,10 @@
 	"name": "C# (.NET)",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
 	"image": "mcr.microsoft.com/devcontainers/dotnet:1-8.0-bookworm",
-	"runArgs": ["--env-file", ".devcontainer/devcontainer.env"],
+	"runArgs": [
+		"--env-file", ".devcontainer/devcontainer.env",
+		"--userns=keep-id"
+	],
 	"features": {
 		"ghcr.io/devcontainers/features/azure-cli:1": {
 			"installBicep": true,
@@ -55,5 +58,7 @@
 	// "customizations": {},
 
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
-	// "remoteUser": "root"
+	//"remoteUser": "vscode",
+	"containerUser": "vscode",
+	"updateRemoteUserUID": true
 }
