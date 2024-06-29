@@ -15,6 +15,10 @@ public class WDBlogPostContentServiceScenarios : Scenarios, IDisposable
 
     public WDBlogPostContentServiceScenarios()
     {
+        _blogPost = new BlogPost();
+        _resultTitle = String.Empty;
+        _service = new WDBlogPostContentService();
+
         CleanUp();
     }
 
@@ -29,8 +33,7 @@ public class WDBlogPostContentServiceScenarios : Scenarios, IDisposable
         Given(a_service)
             .And(a_blog_post);
         When(generating_a_blog_post_title);
-        Then(it_starts_with_the_date)
-            .And(it_ends_with_the_post_slug);
+        Then(it_starts_with_the_date_and_ends_with_the_post_slug);
     }
 
     #region Setup & Teardown Methods
@@ -75,14 +78,15 @@ public class WDBlogPostContentServiceScenarios : Scenarios, IDisposable
 
     #region Then Steps
 
-    void it_starts_with_the_date()
+    void it_starts_with_the_date_and_ends_with_the_post_slug()
     {
+        var expectedYear = _blogPost.PublishDate.Year;
+        var expectedMonth = _blogPost.PublishDate.Month;
+        var expectedDay = _blogPost.PublishDate.Day;
+        
+        var expectedFileName = $"{expectedYear}-{expectedMonth}-{expectedDay}-{_blogPost.Slug}";
 
-    }
-
-    void it_ends_with_the_post_slug()
-    {
-
+        Assert.Equal(expectedFileName, _resultTitle);
     }
 
     #endregion

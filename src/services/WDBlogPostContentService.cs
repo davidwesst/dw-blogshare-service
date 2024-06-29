@@ -6,7 +6,7 @@ public class WDBlogPostContentService: IBlogPostContentService
 {
     public string GenerateBlogPostFileName(BlogPost post)
     {
-        return "test-post";
+        return $"{post.PublishDate.Year}-{post.PublishDate.Month}-{post.PublishDate.Day}-{post.Slug}";
     }
 
     public string GenerateBlogPostContent(BlogPost post, string author)

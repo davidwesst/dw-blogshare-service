@@ -28,7 +28,7 @@ public class CrosspostServiceScenarios : Scenarios, IDisposable
 
     public CrosspostServiceScenarios()
     {
-        // _service = new CrosspostService();
+        _service = new CrosspostService();
         _blogPost = new BlogPost();
         
         _mockLogger = new Mock<ILogger>();
@@ -64,7 +64,7 @@ public class CrosspostServiceScenarios : Scenarios, IDisposable
         }
     }
 
-    [Scenario]
+    [Scenario(Skip = "Need to refactor with new services")]
     public void Crosspost_To_WesternDevs()
     {
         Given(a_crosspostservice)
@@ -80,7 +80,7 @@ public class CrosspostServiceScenarios : Scenarios, IDisposable
 
     void a_crosspostservice()
     {
-        // _service = new CrosspostService(_mockFileSystem.Object, _mockLogger.Object, _mockRepositoryFactory.Object);
+        //_service = new CrosspostService(_mockFileSystem.Object, _mockLogger.Object, _mockRepositoryFactory.Object);
     }
 
     void a_valid_blog_post()

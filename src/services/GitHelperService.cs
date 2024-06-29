@@ -5,13 +5,15 @@ using Microsoft.Extensions.Logging;
 
 namespace DW.Website.Services;
 
-public class GitHelperService(IFileSystem fs, ILogger logger, IGitRepositoryFactory repoFactory)
+public class GitHelperService(IFileSystem fs, IGitRepositoryFactory repoFactory)
 {
+    public GitHelperService() : this(new FileSystem(), new GitRepositoryFactory()) { }
+    
     public void AddFileToRepo(string repoUrl, string relativeFilePath, string fileContents, string commitMessage, string branchName)
     {
         // prep temp directory
         var repoDirectory = Path.Join(Path.GetTempPath(), "testrepo");
-        logger.LogInformation(repoDirectory);
+        //logger.LogInformation(repoDirectory);
 
         // clone repository
         var clonePath = repoFactory.Clone(repoUrl, repoDirectory);
