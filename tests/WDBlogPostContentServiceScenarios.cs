@@ -7,13 +7,13 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
-public class WDBlogPostContentService : Scenarios, IDisposable
+public class WDBlogPostContentServiceScenarios : Scenarios, IDisposable
 {
     BlogPost _blogPost;
     WDBlogPostContentService _service;
     string _resultTitle;
 
-    public WDBlogPostContentService()
+    public WDBlogPostContentServiceScenarios()
     {
         CleanUp();
     }
@@ -68,7 +68,7 @@ public class WDBlogPostContentService : Scenarios, IDisposable
 
     void generating_a_blog_post_title()
     {
-        //_resultTitle = _service.GenerateBlogPostFileName(_blogPost);
+        _resultTitle = _service.GenerateBlogPostFileName(_blogPost);
     }
 
     #endregion
