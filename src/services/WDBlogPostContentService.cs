@@ -1,10 +1,15 @@
-using DW.Website.Models;
-
 namespace DW.Website.Services;
 
-public class PostWriterService
+using DW.Website.Models;
+
+public class WDBlogPostContentService: IBlogPostContentService
 {
-    public string WritePostContents(BlogPost post, string author)
+    public string GenerateBlogPostFileName(BlogPost post)
+    {
+        return "test-post";
+    }
+
+    public string GenerateBlogPostContent(BlogPost post, string author)
     {
         var frontMatter = $@"---
         title: {post.Title}
