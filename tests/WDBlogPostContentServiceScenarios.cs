@@ -15,7 +15,7 @@ public class WDBlogPostContentServiceScenarios : Scenarios, IDisposable
     BlogPost _blogPost;
     WDBlogPostContentService _service;
     string _result = String.Empty;
-    string _testAuthor = String.Empty;
+    string _testAuthorId = String.Empty;
 
     public WDBlogPostContentServiceScenarios()
     {
@@ -50,12 +50,11 @@ public class WDBlogPostContentServiceScenarios : Scenarios, IDisposable
             .And(always_has_frontmatter);
     }
 
-    /**
     [Scenario]
     public void Includes_WD_FrontMatter_Values()
     {
         Given(a_service)
-            .And(a_blog_post)
+            .And(a_blog_post_with_all_properties)
             .And(an_author_id);
         When(generating_the_blog_post_contents);
         Then(it_has_frontmatter_with_a_title)
@@ -67,6 +66,7 @@ public class WDBlogPostContentServiceScenarios : Scenarios, IDisposable
             .And(it_has_frontmatter_with_categories)
             .And(it_has_frontmatter_with_tags);
     }
+    /**
     [Scenario]
     public void Updates_Media_Urls_to_WD_Relative_Locations()
     {
@@ -107,9 +107,26 @@ public class WDBlogPostContentServiceScenarios : Scenarios, IDisposable
         };
    }
 
+    void a_blog_post_with_all_properties()
+    {
+        _blogPost = new BlogPost()
+        {
+            Title = "My test blog post",
+            Description = "My test blog post description",
+            OriginalURL = "https://www.davidwesst.com/blog/testpost",
+            Slug = "testpostslug",
+            PublishDate = DateTime.Now,
+            LastUpdatedDate = DateTime.Now,
+            HTMLContent = "<h1>My test blog post</h1><p>Content goes here</p>",
+            MDContent = "# My test blog post\n\nContent goes here",
+            Categories = [ "category1", "category2" ],
+            Tags = [ "tag1", "tag2" ]
+        };
+   }
+
    void an_author_id()
    {
-        _testAuthor = "test_author_id";
+        _testAuthorId = "test_author_id";
    }
 
     #endregion
@@ -123,7 +140,7 @@ public class WDBlogPostContentServiceScenarios : Scenarios, IDisposable
 
     void generating_the_blog_post_contents()
     {
-        _result = _service.GenerateBlogPostContent(_blogPost, _testAuthor);
+        _result = _service.GenerateBlogPostContent(_blogPost, _testAuthorId);
     }
 
     #endregion
@@ -141,11 +158,6 @@ public class WDBlogPostContentServiceScenarios : Scenarios, IDisposable
         Assert.Equal(expectedFileName, _result);
     }
 
-    void it_has_frontmatter_with_a_title()
-    {
-
-    }
-
     void it_is_valid_markdown()
     {
         Assert.NotNull(_blogPost.MDContent);
@@ -158,6 +170,70 @@ public class WDBlogPostContentServiceScenarios : Scenarios, IDisposable
         var yamlRegex = new Regex(yamlPattern, RegexOptions.Singleline);
 
         Assert.Matches(yamlRegex, _result);
+    }
+    
+    void it_has_frontmatter_with_a_title()
+    {
+        var pattern = @"^---.*?title: "".*?"".*?---";
+        var regex = new Regex(pattern, RegexOptions.Singleline);
+
+        Assert.Matches(regex, _result);
+    }
+
+    void it_has_frontmatter_with_a_description()
+    {
+        var pattern = @"^---.*?description: "".*?"".*?---";
+        var regex = new Regex(pattern, RegexOptions.Singleline);
+
+        Assert.Matches(regex, _result);
+    }
+    
+    void it_has_frontmatter_with_an_excerpt()
+    {
+        var pattern = @"^---.*?excerpt: "".*?"".*?---";
+        var regex = new Regex(pattern, RegexOptions.Singleline);
+
+        Assert.Matches(regex, _result);
+    }
+    
+    void it_has_frontmatter_with_the_author_id()
+    {
+        var pattern = @"^---.*?authorId: "".*?"".*?---";
+        var regex = new Regex(pattern, RegexOptions.Singleline);
+
+        Assert.Matches(regex, _result);
+    }
+
+    void it_has_frontmatter_with_the_publish_date()
+    {
+        var pattern = @"^---.*?date: "".*?"".*?---";
+        var regex = new Regex(pattern, RegexOptions.Singleline);
+
+        Assert.Matches(regex, _result);
+    }
+
+    void it_has_frontmatter_with_the_original_url()
+    {
+        var pattern = @"^---.*?originalurl: "".*?"".*?---";
+        var regex = new Regex(pattern, RegexOptions.Singleline);
+
+        Assert.Matches(regex, _result);
+    }
+
+    void it_has_frontmatter_with_categories()
+    {
+        var pattern = @"^---\n(?:.*\n)*?categories:\s*\n((?:\s+-\s+.+\n)+)(?:.*\n)*?---";
+        var regex = new Regex(pattern, RegexOptions.Singleline);
+
+        Assert.Matches(regex, _result);
+    }
+    
+    void it_has_frontmatter_with_tags()
+    {
+        var pattern = @"^---\n(?:.*\n)*?tags:\s*\n((?:\s+-\s+.+\n)+)(?:.*\n)*?---";
+        var regex = new Regex(pattern, RegexOptions.Singleline);
+
+        Assert.Matches(regex, _result);
     }
     
     #endregion

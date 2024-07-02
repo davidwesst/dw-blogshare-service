@@ -13,10 +13,14 @@ public class WDBlogPostContentService: IBlogPostContentService
     public string GenerateBlogPostContent(BlogPost post, string author)
     {
         var frontMatter = $"---\n" +
-        $"title: {post.Title}\n" +
-        $"date: {post.PublishDate.ToString()}\n" +
-        $"originalurl: {post.OriginalURL}\n" +
-        $"authorId: {author}\n" +
+        $"title: \"{post.Title}\"\n" +
+        $"date: \"{post.PublishDate.ToString("o")}\"\n" +
+        $"description: \"{post.Description}\n" +
+        $"excerpt: \"{post.Excerpt}\"\n" +
+        $"categories: \n  - {string.Join("\n  - ", post.Categories)}\n" +
+        $"tags: \n  - {string.Join("\n  - ", post.Tags)}\"\n" +
+        $"originalurl: \"{post.OriginalURL}\"\n" +
+        $"authorId: \"{author}\"\n" +
         "---";
         var markdownContent = this.GenerateMDfromHTML(post.HTMLContent);
         var postContent = frontMatter + "\n\n" + markdownContent;
