@@ -1,9 +1,10 @@
-name: Deploy 
+name: Build & Deploy 
 
 on:
   push:
     branches:
       - main
+      - ft/*
     paths:
       - 'src/**'
       - 'tests/**'
@@ -33,7 +34,13 @@ jobs:
         dotnet build --configuration Release --output ./output
         popd
 
-    - name: 'Run Azure Functions Action'
+    - name: 'Run Tests'
+      shell: bash
+      run: |
+        dotnet test
+
+    - name: 'Deploy Azure Function (Main Branch Only)'
+      if: github.ref == 'refs/heads/main'
       uses: Azure/functions-action@v1
       id: fa
       with:
