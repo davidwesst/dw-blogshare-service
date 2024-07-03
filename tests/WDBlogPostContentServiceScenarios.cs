@@ -13,25 +13,39 @@ using Xunit;
 
 public class WDBlogPostContentServiceScenarios : Scenarios, IDisposable
 {
-    BlogPost _blogPost;
+    BlogPost _testBlogPost;
     WDBlogPostContentService _service;
     string _resultString = String.Empty;
-    Dictionary<string, string> _resultDictionary;
+    string _resultUrl = String.Empty;
+    string[] _resultUrls = [];
     string _testAuthorId = String.Empty;
 
     public WDBlogPostContentServiceScenarios()
     {
-        _blogPost = new BlogPost();
-        _resultDictionary = new Dictionary<string, string>();
+        _testBlogPost = new BlogPost();
         _service = new WDBlogPostContentService();
 
         CleanUp();
+    }
+
+    #region Setup & Teardown Methods
+
+    void CleanUp()
+    {
+        // clear results
+        _resultString = String.Empty;
+        _resultUrl = String.Empty;
     }
 
     public void Dispose()
     {
         CleanUp();
     }
+    
+    #endregion
+
+
+    #region Scenarios
 
     [Scenario]
     public void Generates_a_WD_Formatted_File_Name()
@@ -71,14 +85,22 @@ public class WDBlogPostContentServiceScenarios : Scenarios, IDisposable
     }
 
     [Scenario]
-    public void Converts_Media_Urls_to_WD_Urls()
+    public void Converts_Media_Url_to_WD_Url()
     {
-        // TODO: Replace this test to test the url conversion logic
-        // ConvertMediaUrl, for string and string []
         Given(a_service)
             .And(a_blog_post_with_all_properties);
-        When(converting_media_urls);
-        Then(it_returns_a_dictionary_of_updated_urls);
+        When(coverting_a_media_url);
+        Then(the_new_url_has_the_same_file_name)
+            .And(the_new_url_is_a_post_specific_folder_in_the_WD_media_directory);
+    }
+
+    [Scenario]
+    public void Coverts_Media_Url_Array_to_WD_Urls()
+    {
+        Given(a_service)
+            .And(a_blog_post_with_all_properties);
+        When(converting_an_array_of_media_urls);
+        Then(returns_an_array_of_updated_urls_that_share_indexes);
     }
 
     [Scenario]
@@ -89,15 +111,6 @@ public class WDBlogPostContentServiceScenarios : Scenarios, IDisposable
             .And(an_author_id);
         When(generating_the_blog_post_contents);
         Then(all_media_urls_are_updated);
-    }
-
-    #region Setup & Teardown Methods
-
-    void CleanUp()
-    {
-        // clear results
-        _resultDictionary = new Dictionary<string, string>();
-        _resultString = String.Empty;
     }
 
     #endregion
@@ -111,7 +124,7 @@ public class WDBlogPostContentServiceScenarios : Scenarios, IDisposable
 
     void a_blog_post()
     {
-        _blogPost = new BlogPost()
+        _testBlogPost = new BlogPost()
         {
             Title = "My test blog post",
             Description = "My test blog post description",
@@ -124,7 +137,7 @@ public class WDBlogPostContentServiceScenarios : Scenarios, IDisposable
 
     void a_blog_post_with_all_properties()
     {
-        _blogPost = new BlogPost()
+        _testBlogPost = new BlogPost()
         {
             Title = "My test blog post",
             Description = "My test blog post description",
@@ -151,16 +164,24 @@ public class WDBlogPostContentServiceScenarios : Scenarios, IDisposable
 
     void generating_a_blog_post_title()
     {
-        _resultString = _service.GenerateBlogPostFileName(_blogPost);
+        _resultString = _service.GenerateBlogPostFileName(_testBlogPost);
     }
 
     void generating_the_blog_post_contents()
     {
-        _resultString = _service.GenerateBlogPostContent(_blogPost, _testAuthorId);
+        _resultString = _service.GenerateBlogPostContent(_testBlogPost, _testAuthorId);
     }
-    void converting_media_urls()
+
+    void coverting_a_media_url()
     {
-        _resultDictionary = _service.ConvertMediaUrls(_blogPost);
+        var blogPostFileName = _service.GenerateBlogPostFileName(_testBlogPost);
+        _resultUrl = _service.ConvertMediaUrl(blogPostFileName, _testBlogPost.MediaURLs[0]);
+    }
+
+    void converting_an_array_of_media_urls()
+    {
+        var blogPostFileName = _service.GenerateBlogPostFileName(_testBlogPost);
+        _resultUrls = _service.ConvertMediaUrls(blogPostFileName, _testBlogPost.MediaURLs);
     }
 
     #endregion
@@ -169,18 +190,18 @@ public class WDBlogPostContentServiceScenarios : Scenarios, IDisposable
 
     void it_starts_with_the_date_and_ends_with_the_post_slug()
     {
-        var expectedYear = _blogPost.PublishDate.Year;
-        var expectedMonth = _blogPost.PublishDate.Month;
-        var expectedDay = _blogPost.PublishDate.Day;
+        var expectedYear = _testBlogPost.PublishDate.Year;
+        var expectedMonth = _testBlogPost.PublishDate.Month;
+        var expectedDay = _testBlogPost.PublishDate.Day;
         
-        var expectedFileName = $"{expectedYear}-{expectedMonth}-{expectedDay}-{_blogPost.Slug}";
+        var expectedFileName = $"{expectedYear}-{expectedMonth}-{expectedDay}-{_testBlogPost.Slug}";
 
         Assert.Equal(expectedFileName, _resultString);
     }
 
     void it_is_valid_markdown()
     {
-        Assert.NotNull(_blogPost.MDContent);
+        Assert.NotNull(_testBlogPost.MDContent);
         Assert.Contains("# My test blog post\n\nContent goes here", _resultString);
     }
 
@@ -258,25 +279,43 @@ public class WDBlogPostContentServiceScenarios : Scenarios, IDisposable
 
     void all_media_urls_are_updated()
     {
-        var updatedUrls = _service.ConvertMediaUrls(_blogPost);
-        foreach (var url in updatedUrls)
+        var updatedUrls = _service.ConvertMediaUrls(_service.GenerateBlogPostFileName(_testBlogPost), _testBlogPost.MediaURLs);
+        for(var itemIndex = 0; itemIndex < _testBlogPost.MediaURLs.Length; itemIndex++)
         {
-            Assert.DoesNotContain(url.Key, _resultString);
-            Assert.Contains(url.Value, _resultString);   
+            Assert.DoesNotContain(_testBlogPost.MediaURLs[itemIndex], _resultString);
+            Assert.Contains(updatedUrls[itemIndex], _resultString);
         }
     }
 
-    void it_returns_a_dictionary_of_updated_urls()
+    void the_new_url_has_the_same_file_name()
     {
-        // check that same amount was created
-        Assert.Equal(_blogPost.MediaURLs.Length, _resultDictionary.Count);
+        Assert.Equal(Path.GetFileName(_testBlogPost.MediaURLs[0]), Path.GetFileName(_resultUrl));
+    }
 
-        foreach (var item in _resultDictionary)
+    void the_new_url_is_a_post_specific_folder_in_the_WD_media_directory()
+    {
+        var expectedPath = Path.Join($"{WDBlogPostContentService.WD_MEDIA_DIRECTORY}", _service.GenerateBlogPostFileName(_testBlogPost));
+        Assert.StartsWith(expectedPath, _resultUrl);
+    }
+
+
+    void returns_an_array_of_updated_urls_that_share_indexes()
+    {
+        // check that the same number were created
+        Assert.Equal(_testBlogPost.MediaURLs.Length, _resultUrls.Length);
+
+        // check each item based on index
+        for (var itemIndex = 0; itemIndex < _resultUrls.Length; itemIndex++)
         {
-            Assert.Equal(Path.GetFileName(item.Key), Path.GetFileName(item.Value));
+            var originalItem = _testBlogPost.MediaURLs[itemIndex];
+            var updatedItem = _resultUrls[itemIndex];
 
-            var expectedNewUrl = Path.Join(WDBlogPostContentService.WD_MEDIA_DIRECTORY, _service.GenerateBlogPostFileName(_blogPost), Path.GetFileName(item.Value));
-            Assert.Equal(expectedNewUrl, item.Value);
+            // check if updated
+            var expectedNewUrl = Path.Join(WDBlogPostContentService.WD_MEDIA_DIRECTORY, _service.GenerateBlogPostFileName(_testBlogPost), Path.GetFileName(updatedItem));
+            Assert.Equal(expectedNewUrl, updatedItem);
+
+            // check if file names match, based on index
+            Assert.Equal(Path.GetFileName(originalItem), Path.GetFileName(updatedItem));
         }
     }
 

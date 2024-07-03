@@ -2,6 +2,7 @@ namespace DW.Website.Services;
 
 using DW.Website.Models;
 using ReverseMarkdown;
+using ReverseMarkdown.Converters;
 
 public class WDBlogPostContentService: IBlogPostContentService
 {
@@ -10,19 +11,6 @@ public class WDBlogPostContentService: IBlogPostContentService
     public string GenerateBlogPostFileName(BlogPost post) 
     {
         return $"{post.PublishDate.Year}-{post.PublishDate.Month}-{post.PublishDate.Day}-{post.Slug}";
-    }
-
-    public Dictionary<string, string> ConvertMediaUrls(BlogPost post)
-    {
-        var updatedUrls = new Dictionary<string, string>();
-
-        foreach (var url in post.MediaURLs)
-        {
-            var wdUrl = this.ConvertMediaUrl(GenerateBlogPostFileName(post), Path.GetFileName(url));
-            updatedUrls.Add(url, wdUrl);
-        }
-
-        return updatedUrls;
     }
 
     public string GenerateBlogPostContent(BlogPost post, string author)
@@ -61,6 +49,18 @@ public class WDBlogPostContentService: IBlogPostContentService
         var wdUrl = Path.Join(WD_MEDIA_DIRECTORY, postFileName, Path.GetFileName(originalMediaUrl));
 
         return wdUrl;
+    }
+
+    public string[] ConvertMediaUrls(string postFileName, string[] originalMediaUrls)
+    {
+        string[] convertedUrls = new string[originalMediaUrls.Length];
+
+        for(var itemIndex = 0; itemIndex < convertedUrls.Length; itemIndex++)
+        {
+            convertedUrls[itemIndex] = this.ConvertMediaUrl(postFileName, originalMediaUrls[itemIndex]);
+        }
+
+        return convertedUrls;
     }
 
     public string UpdateMediaUrl(string contentString, string postFileName, string originalMediaUrl)
