@@ -61,7 +61,7 @@ public class WDBlogPostContentServiceScenarios : Scenarios, IDisposable
             .And(it_has_frontmatter_with_a_description)
             .And(it_has_frontmatter_with_an_excerpt)
             .And(it_has_frontmatter_with_the_author_id)
-            .And(it_has_frontmatter_with_the_publish_date)
+            .And(it_has_frontmatter_with_the_publish_date_in_iso8601_format)
             .And(it_has_frontmatter_with_the_original_url)
             .And(it_has_frontmatter_with_categories)
             .And(it_has_frontmatter_with_tags);
@@ -204,9 +204,9 @@ public class WDBlogPostContentServiceScenarios : Scenarios, IDisposable
         Assert.Matches(regex, _result);
     }
 
-    void it_has_frontmatter_with_the_publish_date()
+    void it_has_frontmatter_with_the_publish_date_in_iso8601_format()
     {
-        var pattern = @"^---.*?date: "".*?"".*?---";
+        var pattern = @"^---.*?date: ""(\d{4})-(\d{2})-(\d{2})[T\s](\d{2}):(\d{2}):(\d{2})(\.\d+)?(Z|([+-](\d{2}):?(\d{2})))?"".*?---";
         var regex = new Regex(pattern, RegexOptions.Singleline);
 
         Assert.Matches(regex, _result);

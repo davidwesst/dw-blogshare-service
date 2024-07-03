@@ -14,7 +14,7 @@ public class WDBlogPostContentService: IBlogPostContentService
     {
         var frontMatter = $"---\n" +
         $"title: \"{post.Title}\"\n" +
-        $"date: \"{post.PublishDate.ToString("o")}\"\n" +
+        $"date: \"{post.PublishDate.ToString("u")}\"\n" +
         $"description: \"{post.Description}\n" +
         $"excerpt: \"{post.Excerpt}\"\n" +
         $"categories: \n  - {string.Join("\n  - ", post.Categories)}\n" +
