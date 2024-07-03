@@ -7,6 +7,7 @@ using DW.Website.Services;
 using Kekiri.Xunit;
 using Microsoft.Extensions.Logging;
 using Moq;
+using NuGet.Frameworks;
 using ReverseMarkdown.Converters;
 using Xunit;
 
@@ -14,12 +15,14 @@ public class WDBlogPostContentServiceScenarios : Scenarios, IDisposable
 {
     BlogPost _blogPost;
     WDBlogPostContentService _service;
-    string _result = String.Empty;
+    string _resultString = String.Empty;
+    Dictionary<string, string> _resultDictionary;
     string _testAuthorId = String.Empty;
 
     public WDBlogPostContentServiceScenarios()
     {
         _blogPost = new BlogPost();
+        _resultDictionary = new Dictionary<string, string>();
         _service = new WDBlogPostContentService();
 
         CleanUp();
@@ -66,23 +69,35 @@ public class WDBlogPostContentServiceScenarios : Scenarios, IDisposable
             .And(it_has_frontmatter_with_categories)
             .And(it_has_frontmatter_with_tags);
     }
-    /**
+
+    [Scenario]
+    public void Converts_Media_Urls_to_WD_Urls()
+    {
+        // TODO: Replace this test to test the url conversion logic
+        // ConvertMediaUrl, for string and string []
+        Given(a_service)
+            .And(a_blog_post_with_all_properties);
+        When(converting_media_urls);
+        Then(it_returns_a_dictionary_of_updated_urls);
+    }
+
     [Scenario]
     public void Updates_Media_Urls_to_WD_Relative_Locations()
     {
         Given(a_service)
-            .And(a_blog_post_with_media)
+            .And(a_blog_post_with_all_properties)
             .And(an_author_id);
         When(generating_the_blog_post_contents);
         Then(all_media_urls_are_updated);
     }
-    **/
 
     #region Setup & Teardown Methods
 
     void CleanUp()
     {
-
+        // clear results
+        _resultDictionary = new Dictionary<string, string>();
+        _resultString = String.Empty;
     }
 
     #endregion
@@ -117,11 +132,11 @@ public class WDBlogPostContentServiceScenarios : Scenarios, IDisposable
             Slug = "testpostslug",
             PublishDate = DateTime.Now,
             LastUpdatedDate = DateTime.Now,
-            HTMLContent = "<h1>This is a test post</h1><p>  This is the content with an image. <img src=\"images/test_image.png\" alt=\"alt text here\" title=\"Title\" /> More text.</p>",
-            MDContent = "# This is a test post\nThis is the content with an image.![alt text here](images/test_image.png \"Title\")More text.",
+            HTMLContent = "<h1>This is a test post</h1><p>  This is the content with an image. <img src=\"test_location/test_image.png\" alt=\"alt text here\" title=\"Title\" /> More text.</p>",
+            MDContent = "# This is a test post\nThis is the content with an image.![alt text here](test_location/test_image.png \"Title\")More text.",
             Categories = [ "category1", "category2" ],
             Tags = [ "tag1", "tag2" ],
-            MediaURLs = [ "images/test_images.png" ]
+            MediaURLs = [ "test_location/test_image.png" ]
         };
    }
 
@@ -136,12 +151,16 @@ public class WDBlogPostContentServiceScenarios : Scenarios, IDisposable
 
     void generating_a_blog_post_title()
     {
-        _result = _service.GenerateBlogPostFileName(_blogPost);
+        _resultString = _service.GenerateBlogPostFileName(_blogPost);
     }
 
     void generating_the_blog_post_contents()
     {
-        _result = _service.GenerateBlogPostContent(_blogPost, _testAuthorId);
+        _resultString = _service.GenerateBlogPostContent(_blogPost, _testAuthorId);
+    }
+    void converting_media_urls()
+    {
+        _resultDictionary = _service.ConvertMediaUrls(_blogPost);
     }
 
     #endregion
@@ -156,13 +175,13 @@ public class WDBlogPostContentServiceScenarios : Scenarios, IDisposable
         
         var expectedFileName = $"{expectedYear}-{expectedMonth}-{expectedDay}-{_blogPost.Slug}";
 
-        Assert.Equal(expectedFileName, _result);
+        Assert.Equal(expectedFileName, _resultString);
     }
 
     void it_is_valid_markdown()
     {
         Assert.NotNull(_blogPost.MDContent);
-        Assert.Contains("# My test blog post\n\nContent goes here", _result);
+        Assert.Contains("# My test blog post\n\nContent goes here", _resultString);
     }
 
     void always_has_frontmatter()
@@ -170,7 +189,7 @@ public class WDBlogPostContentServiceScenarios : Scenarios, IDisposable
         var yamlPattern = @"^---\s*\n.*?\n---\s*\n";
         var yamlRegex = new Regex(yamlPattern, RegexOptions.Singleline);
 
-        Assert.Matches(yamlRegex, _result);
+        Assert.Matches(yamlRegex, _resultString);
     }
     
     void it_has_frontmatter_with_a_title()
@@ -178,7 +197,7 @@ public class WDBlogPostContentServiceScenarios : Scenarios, IDisposable
         var pattern = @"^---.*?title: "".*?"".*?---";
         var regex = new Regex(pattern, RegexOptions.Singleline);
 
-        Assert.Matches(regex, _result);
+        Assert.Matches(regex, _resultString);
     }
 
     void it_has_frontmatter_with_a_description()
@@ -186,7 +205,7 @@ public class WDBlogPostContentServiceScenarios : Scenarios, IDisposable
         var pattern = @"^---.*?description: "".*?"".*?---";
         var regex = new Regex(pattern, RegexOptions.Singleline);
 
-        Assert.Matches(regex, _result);
+        Assert.Matches(regex, _resultString);
     }
     
     void it_has_frontmatter_with_an_excerpt()
@@ -194,7 +213,7 @@ public class WDBlogPostContentServiceScenarios : Scenarios, IDisposable
         var pattern = @"^---.*?excerpt: "".*?"".*?---";
         var regex = new Regex(pattern, RegexOptions.Singleline);
 
-        Assert.Matches(regex, _result);
+        Assert.Matches(regex, _resultString);
     }
     
     void it_has_frontmatter_with_the_author_id()
@@ -202,7 +221,7 @@ public class WDBlogPostContentServiceScenarios : Scenarios, IDisposable
         var pattern = @"^---.*?authorId: "".*?"".*?---";
         var regex = new Regex(pattern, RegexOptions.Singleline);
 
-        Assert.Matches(regex, _result);
+        Assert.Matches(regex, _resultString);
     }
 
     void it_has_frontmatter_with_the_publish_date_in_iso8601_format()
@@ -210,7 +229,7 @@ public class WDBlogPostContentServiceScenarios : Scenarios, IDisposable
         var pattern = @"^---.*?date: ""(\d{4})-(\d{2})-(\d{2})[T\s](\d{2}):(\d{2}):(\d{2})(\.\d+)?(Z|([+-](\d{2}):?(\d{2})))?"".*?---";
         var regex = new Regex(pattern, RegexOptions.Singleline);
 
-        Assert.Matches(regex, _result);
+        Assert.Matches(regex, _resultString);
     }
 
     void it_has_frontmatter_with_the_original_url()
@@ -218,7 +237,7 @@ public class WDBlogPostContentServiceScenarios : Scenarios, IDisposable
         var pattern = @"^---.*?originalurl: "".*?"".*?---";
         var regex = new Regex(pattern, RegexOptions.Singleline);
 
-        Assert.Matches(regex, _result);
+        Assert.Matches(regex, _resultString);
     }
 
     void it_has_frontmatter_with_categories()
@@ -226,7 +245,7 @@ public class WDBlogPostContentServiceScenarios : Scenarios, IDisposable
         var pattern = @"^---\n(?:.*\n)*?categories:\s*\n((?:\s+-\s+.+\n)+)(?:.*\n)*?---";
         var regex = new Regex(pattern, RegexOptions.Singleline);
 
-        Assert.Matches(regex, _result);
+        Assert.Matches(regex, _resultString);
     }
     
     void it_has_frontmatter_with_tags()
@@ -234,8 +253,32 @@ public class WDBlogPostContentServiceScenarios : Scenarios, IDisposable
         var pattern = @"^---\n(?:.*\n)*?tags:\s*\n((?:\s+-\s+.+\n)+)(?:.*\n)*?---";
         var regex = new Regex(pattern, RegexOptions.Singleline);
 
-        Assert.Matches(regex, _result);
+        Assert.Matches(regex, _resultString);
     }
-    
+
+    void all_media_urls_are_updated()
+    {
+        var updatedUrls = _service.ConvertMediaUrls(_blogPost);
+        foreach (var url in updatedUrls)
+        {
+            Assert.DoesNotContain(url.Key, _resultString);
+            Assert.Contains(url.Value, _resultString);   
+        }
+    }
+
+    void it_returns_a_dictionary_of_updated_urls()
+    {
+        // check that same amount was created
+        Assert.Equal(_blogPost.MediaURLs.Length, _resultDictionary.Count);
+
+        foreach (var item in _resultDictionary)
+        {
+            Assert.Equal(Path.GetFileName(item.Key), Path.GetFileName(item.Value));
+
+            var expectedNewUrl = Path.Join(WDBlogPostContentService.WD_MEDIA_DIRECTORY, _service.GenerateBlogPostFileName(_blogPost), Path.GetFileName(item.Value));
+            Assert.Equal(expectedNewUrl, item.Value);
+        }
+    }
+
     #endregion
 }
