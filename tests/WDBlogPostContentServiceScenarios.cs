@@ -117,10 +117,11 @@ public class WDBlogPostContentServiceScenarios : Scenarios, IDisposable
             Slug = "testpostslug",
             PublishDate = DateTime.Now,
             LastUpdatedDate = DateTime.Now,
-            HTMLContent = "<h1>My test blog post</h1><p>Content goes here</p>",
-            MDContent = "# My test blog post\n\nContent goes here",
+            HTMLContent = "<h1>This is a test post</h1><p>  This is the content with an image. <img src=\"images/test_image.png\" alt=\"alt text here\" title=\"Title\" /> More text.</p>",
+            MDContent = "# This is a test post\nThis is the content with an image.![alt text here](images/test_image.png \"Title\")More text.",
             Categories = [ "category1", "category2" ],
-            Tags = [ "tag1", "tag2" ]
+            Tags = [ "tag1", "tag2" ],
+            MediaURLs = [ "images/test_images.png" ]
         };
    }
 
