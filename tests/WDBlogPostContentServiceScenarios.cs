@@ -44,7 +44,6 @@ public class WDBlogPostContentServiceScenarios : Scenarios, IDisposable
     
     #endregion
 
-
     #region Scenarios
 
     [Scenario]
@@ -95,7 +94,7 @@ public class WDBlogPostContentServiceScenarios : Scenarios, IDisposable
     }
 
     [Scenario]
-    public void Coverts_Media_Url_Array_to_WD_Urls()
+    public void Converts_Media_Url_Array_to_WD_Urls()
     {
         Given(a_service)
             .And(a_blog_post_with_all_properties);
